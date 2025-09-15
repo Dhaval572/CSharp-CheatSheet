@@ -3,6 +3,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 import javax.servlet.ServletException;
@@ -110,12 +111,12 @@ public class MyServlet extends HttpServlet {
                 printSuccessfulConnection(out, conn);
                 queryUserData(out, conn);
             }
-        } catch (Exception e) {
+        } catch (ClassNotFoundException | SQLException e) {
             printConnectionError(out, e);
         }
     }
     
-    private void printSuccessfulConnection(PrintWriter out, Connection conn) {
+    private void printSuccessfulConnection(PrintWriter out, @SuppressWarnings("unused") Connection conn) {
         out.println("            <div class='card mb-4'>");
         out.println("                <div class='card-header alert-success'>");
         out.println("                    <h3><i class='fas fa-check-circle'></i> Database: Connected Successfully!</h3>");
