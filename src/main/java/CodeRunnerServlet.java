@@ -17,15 +17,15 @@ public class CodeRunnerServlet extends HttpServlet {
     
     private static final String TEMP_CODE_FILE = "temp_code.cs";
     private static final String TEMP_OUTPUT_FILE = "temp_output.txt";
-    private static final String CPP_INTERPRETER = "CSharpInterpreter.exe";
+    // private static final String CPP_INTERPRETER = "CSharpInterpreter.exe";
     
     // Get the absolute path to the C++ interpreter
     private String getCppInterpreterPath() {
         // Use the known absolute path first
-        String absolutePath = "C:\\Users\\LENOVO\\Documents\\C# Cheatsheet\\CSharpInterpreter.exe";
-        File absoluteFile = new File(absolutePath);
+        String interpreterPath = "CSharpInterpreter.exe";
+        File absoluteFile = new File(interpreterPath);
         if (absoluteFile.exists()) {
-            return absolutePath;
+            return interpreterPath;
         }
         
         // Try current directory as fallback
@@ -60,11 +60,10 @@ public class CodeRunnerServlet extends HttpServlet {
             // Ignore and continue
         }
         
-        return absolutePath; // Return the expected absolute path even if not found
+        return interpreterPath; // Return the expected absolute path even if not found
     }
     
     // C++ interpreter only - no Java fallback
-    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -86,7 +85,11 @@ public class CodeRunnerServlet extends HttpServlet {
         response.setContentType("application/json;charset=UTF-8");
         
         try (PrintWriter out = response.getWriter()) {
-            if ("run_code".equals(action) && code != null && !code.trim().isEmpty()) {
+            if (
+                "run_code".equals(action) 
+                && code != null 
+                && !code.trim().isEmpty()
+            ) {
                 String result = executeCode(code);
                 out.println("{\"success\": true, \"output\": \"" + escapeJson(result) + "\"}");
             } else {
@@ -101,7 +104,7 @@ public class CodeRunnerServlet extends HttpServlet {
             if (isCppInterpreterAvailable()) {
                 return executeCppInterpreter(code);
             } else {
-                String expectedPath = "C:\\Users\\LENOVO\\Documents\\CSharp Cheatsheet\\CSharpInterpreter.exe";
+                String expectedPath = "CSharpInterpreter.exe";
                 return "Error: C++ interpreter not found at expected location: " + expectedPath + "\n" +
                        "Please build it first using: g++ -std=c++17 -O2 -o CSharpInterpreter.exe src/main/cpp/CSharpInterpreter.cpp";
             }
@@ -122,7 +125,7 @@ public class CodeRunnerServlet extends HttpServlet {
             String interpreterPath = getCppInterpreterPath();
             
             // Use the project directory as working directory
-            String workingDir = "C:\\Users\\LENOVO\\Documents\\CSharp Cheatsheet";
+            String workingDir = System.getProperty("user.dir");
             
             // Write code to temporary file in the working directory
             File tempCodeFile = new File(workingDir, TEMP_CODE_FILE);
@@ -133,7 +136,13 @@ public class CodeRunnerServlet extends HttpServlet {
             }
             
             // Execute C++ interpreter with file input
-            ProcessBuilder pb = new ProcessBuilder(interpreterPath, tempCodeFile.getAbsolutePath(), tempOutputFile.getAbsolutePath());
+            ProcessBuilder pb = 
+            new ProcessBuilder(
+                interpreterPath, 
+                tempCodeFile.getAbsolutePath(), 
+                tempOutputFile.getAbsolutePath()
+            );
+
             pb.directory(new File(workingDir));
             pb.redirectErrorStream(true);
             
@@ -161,7 +170,7 @@ public class CodeRunnerServlet extends HttpServlet {
                         String result = Files.readString(tempOutputFile.toPath()).trim();
                         tempOutputFile.delete();
                         return result.isEmpty() ? "Code executed successfully (no output)" : "[C++ Interpreter]\n" + result;
-                    } catch (Exception e) {
+                    } catch (IOException e) {
                         tempOutputFile.delete();
                         return "[C++ Interpreter]\n" + consoleOutput.toString().trim();
                     }
@@ -175,11 +184,12 @@ public class CodeRunnerServlet extends HttpServlet {
                 return "C++ Execution failed with exit code: " + exitCode + "\nInterpreter path: " + interpreterPath + "\n" + consoleOutput.toString();
             }
             
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException e) {
             // Clean up files
             try {
-                new File("C:\\Users\\LENOVO\\Documents\\C# Cheatsheet", TEMP_CODE_FILE).delete();
-                new File("C:\\Users\\LENOVO\\Documents\\C# Cheatsheet", TEMP_OUTPUT_FILE).delete();
+                
+                new File(System.getProperty("user.dir"), TEMP_CODE_FILE).delete();
+                new File(System.getProperty("user.dir"), TEMP_OUTPUT_FILE).delete();
             } catch (Exception cleanupEx) {
                 // Ignore cleanup errors
             }

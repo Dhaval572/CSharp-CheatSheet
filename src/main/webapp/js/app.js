@@ -1,9 +1,9 @@
 // JavaScript functionality for C# Cheatsheet Application
 
 // DOM Content Loaded Event
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('C# Cheatsheet Application loaded successfully');
-    
+
     // Initialize all components
     initializeCopyButtons();
     initializeNavigation();
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeCopyButtons() {
     // Add copy buttons to all code blocks
     const codeBlocks = document.querySelectorAll('.code-block');
-    
+
     codeBlocks.forEach(block => {
         // Create copy button if it doesn't exist
         if (!block.querySelector('.copy-btn')) {
@@ -32,16 +32,17 @@ function initializeCopyButtons() {
 // Copy code to clipboard function
 function copyCodeToClipboard(codeBlock, button) {
     const code = codeBlock.querySelector('pre')?.textContent || codeBlock.textContent;
-    
+
     navigator.clipboard.writeText(code).then(() => {
         // Success feedback
         button.textContent = 'Copied!';
         button.classList.add('copied');
-        
+
         setTimeout(() => {
             button.textContent = 'Copy';
             button.classList.remove('copied');
         }, 2000);
+        
     }).catch(err => {
         console.error('Failed to copy: ', err);
         // Fallback for older browsers
@@ -49,9 +50,8 @@ function copyCodeToClipboard(codeBlock, button) {
         textArea.value = code;
         document.body.appendChild(textArea);
         textArea.select();
-        document.execCommand('copy');
         document.body.removeChild(textArea);
-        
+
         button.textContent = 'Copied!';
         setTimeout(() => {
             button.textContent = 'Copy';
@@ -62,28 +62,28 @@ function copyCodeToClipboard(codeBlock, button) {
 // Navigation functionality
 function initializeNavigation() {
     const navItems = document.querySelectorAll('.nav-item');
-    
+
     navItems.forEach(item => {
-        item.addEventListener('click', function(e) {
+        item.addEventListener('click', function (e) {
             // Handle internal anchor links
             const href = this.getAttribute('href');
             if (href && href.startsWith('#')) {
                 e.preventDefault();
                 const target = document.querySelector(href);
                 if (target) {
-                    target.scrollIntoView({ 
+                    target.scrollIntoView({
                         behavior: 'smooth',
                         block: 'start'
                     });
                 }
             }
-            
+
             // Update active navigation item
             navItems.forEach(nav => nav.classList.remove('active'));
             this.classList.add('active');
         });
     });
-    
+
     // Update active nav based on scroll position
     window.addEventListener('scroll', updateActiveNavOnScroll);
 }
@@ -92,9 +92,9 @@ function initializeNavigation() {
 function updateActiveNavOnScroll() {
     const sections = document.querySelectorAll('[id]');
     const navItems = document.querySelectorAll('.nav-item[href^="#"]');
-    
+
     let current = '';
-    
+
     sections.forEach(section => {
         const sectionTop = section.offsetTop;
         const sectionHeight = section.clientHeight;
@@ -102,7 +102,7 @@ function updateActiveNavOnScroll() {
             current = section.getAttribute('id');
         }
     });
-    
+
     navItems.forEach(item => {
         item.classList.remove('active');
         if (item.getAttribute('href') === '#' + current) {
@@ -114,23 +114,23 @@ function updateActiveNavOnScroll() {
 // Code highlighting (basic syntax highlighting)
 function initializeCodeHighlighting() {
     const codeBlocks = document.querySelectorAll('.code-block pre');
-    
+
     codeBlocks.forEach(block => {
         let code = block.innerHTML;
-        
+
         // Basic C# syntax highlighting
         code = code.replace(/\b(public|private|protected|internal|static|readonly|const|virtual|override|abstract|sealed|class|interface|struct|enum|namespace|using|if|else|for|foreach|while|do|switch|case|default|break|continue|return|try|catch|finally|throw|new|this|base|null|true|false|var|int|string|bool|double|float|decimal|char|byte|short|long|object|void)\b/g, '<span class="keyword">$1</span>');
-        
+
         // String highlighting
         code = code.replace(/"([^"\\]|\\.)*"/g, '<span class="string">$&</span>');
-        
+
         // Comment highlighting
         code = code.replace(/\/\/.*$/gm, '<span class="comment">$&</span>');
         code = code.replace(/\/\*[\s\S]*?\*\//g, '<span class="comment">$&</span>');
-        
+
         // Number highlighting
         code = code.replace(/\b\d+(\.\d+)?\b/g, '<span class="number">$&</span>');
-        
+
         block.innerHTML = code;
     });
 }
@@ -138,12 +138,12 @@ function initializeCodeHighlighting() {
 // Smooth scrolling for all internal links
 function initializeSmoothScrolling() {
     const links = document.querySelectorAll('a[href^="#"]');
-    
+
     links.forEach(link => {
-        link.addEventListener('click', function(e) {
+        link.addEventListener('click', function (e) {
             const targetId = this.getAttribute('href');
             const target = document.querySelector(targetId);
-            
+
             if (target) {
                 e.preventDefault();
                 target.scrollIntoView({
@@ -158,7 +158,7 @@ function initializeSmoothScrolling() {
 // Initialize tooltips
 function initializeTooltips() {
     const tooltipElements = document.querySelectorAll('[data-tooltip]');
-    
+
     tooltipElements.forEach(element => {
         element.addEventListener('mouseenter', showTooltip);
         element.addEventListener('mouseleave', hideTooltip);
@@ -170,13 +170,13 @@ function showTooltip(e) {
     const tooltip = document.createElement('div');
     tooltip.className = 'tooltip';
     tooltip.textContent = e.target.getAttribute('data-tooltip');
-    
+
     document.body.appendChild(tooltip);
-    
+
     const rect = e.target.getBoundingClientRect();
     tooltip.style.left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2) + 'px';
     tooltip.style.top = rect.top - tooltip.offsetHeight - 8 + 'px';
-    
+
     e.target.tooltipElement = tooltip;
 }
 
@@ -192,11 +192,11 @@ function hideTooltip(e) {
 function initializeSearch() {
     const searchInput = document.getElementById('search-input');
     const searchResults = document.getElementById('search-results');
-    
+
     if (searchInput) {
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             const query = this.value.toLowerCase().trim();
-            
+
             if (query.length > 2) {
                 performSearch(query);
             } else {
@@ -210,7 +210,7 @@ function initializeSearch() {
 function performSearch(query) {
     const sections = document.querySelectorAll('.card, .section');
     const results = [];
-    
+
     sections.forEach(section => {
         const text = section.textContent.toLowerCase();
         if (text.includes(query)) {
@@ -221,7 +221,7 @@ function performSearch(query) {
             });
         }
     });
-    
+
     displaySearchResults(results);
 }
 
@@ -229,14 +229,13 @@ function performSearch(query) {
 function displaySearchResults(results) {
     const searchResults = document.getElementById('search-results');
     if (!searchResults) return;
-    
     searchResults.innerHTML = '';
-    
+
     if (results.length === 0) {
         searchResults.innerHTML = '<div class="no-results">No results found</div>';
         return;
     }
-    
+
     results.forEach(result => {
         const resultItem = document.createElement('div');
         resultItem.className = 'search-result-item';
@@ -273,16 +272,16 @@ function checkDatabaseStatus() {
 // Theme switcher (if implemented)
 function initializeThemeSwitcher() {
     const themeToggle = document.getElementById('theme-toggle');
-    
+
     if (themeToggle) {
-        themeToggle.addEventListener('click', function() {
+        themeToggle.addEventListener('click', function () {
             document.body.classList.toggle('dark-theme');
-            
+
             // Save theme preference
             const isDark = document.body.classList.contains('dark-theme');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
         });
-        
+
         // Load saved theme
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
@@ -296,9 +295,9 @@ function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.classList.add('fade-out');
         setTimeout(() => {

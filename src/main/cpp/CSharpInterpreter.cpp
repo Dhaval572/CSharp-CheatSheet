@@ -1,12 +1,12 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <array>
 #include <map>
 #include <sstream>
 #include <algorithm>
 #include <fstream>
 #include <cctype>
-
 using namespace std;
 
 class CSharpInterpreter
@@ -131,8 +131,8 @@ private:
                 // Evaluate expressions within interpolation
                 if (ContainsArithmetic(expression))
                 {
-                    string evalExpr = SubstituteVariables(expression);
-                    replacement = to_string(static_cast<int>(EvaluateArithmetic(evalExpr)));
+                    string eval_expr = SubstituteVariables(expression);
+                    replacement = to_string(static_cast<int>(EvaluateArithmetic(eval_expr)));
                 }
                 else
                 {
@@ -154,28 +154,30 @@ private:
     // Check for string concatenation
     bool ContainsStringConcatenation(const string &expr)
     {
-        return expr.find(" + ") != string::npos && (expr.find('"') != string::npos || hasStringVariable(expr));
+        return expr.find(" + ") != string::npos && (expr.find('"') != string::npos || b_HasStringVariable(expr));
     }
 
     // Check if expression has string variables
-    bool hasStringVariable(const string &expr)
+    bool b_HasStringVariable(const string &expr)
     {
         for (const auto &pair : variables)
         {
             if (expr.find(pair.first) != string::npos)
             {
                 // Check if it's a string value (non-numeric)
-                bool isNumeric = true;
+                bool b_IsNumeric = true;
                 for (char c : pair.second)
                 {
                     if (!isdigit(c) && c != '.' && c != '-')
                     {
-                        isNumeric = false;
+                        b_IsNumeric = false;
                         break;
                     }
                 }
-                if (!isNumeric)
+                if (!b_IsNumeric)
+                {
                     return true;
+                }
             }
         }
         return false;
@@ -191,14 +193,14 @@ private:
         size_t pos = 0;
         while (pos < result.length())
         {
-            size_t nextPlus = result.find(" + ", pos);
-            if (nextPlus == string::npos)
+            size_t next_plus = result.find(" + ", pos);
+            if (next_plus == string::npos)
             {
                 parts.push_back(Trim(result.substr(pos)));
                 break;
             }
-            parts.push_back(Trim(result.substr(pos, nextPlus - pos)));
-            pos = nextPlus + 3;
+            parts.push_back(Trim(result.substr(pos, next_plus - pos)));
+            pos = next_plus + 3;
         }
 
         string concatenated = "";
@@ -207,7 +209,12 @@ private:
             string value = Trim(part);
 
             // Remove quotes if present
-            if (value.length() >= 2 && value.front() == '"' && value.back() == '"')
+            if 
+            (
+                value.length() >= 2 
+                && value.front() == '"' 
+                && value.back() == '"'
+            )
             {
                 concatenated += value.substr(1, value.length() - 2);
             }
@@ -243,15 +250,15 @@ private:
 
             if (end != string::npos)
             {
-                string subExpr = result.substr(start + 1, end - start - 1);
-                string subResult = SubstituteVariables(subExpr);
+                string sub_expr = result.substr(start + 1, end - start - 1);
+                string sub_result = SubstituteVariables(sub_expr);
 
-                if (ContainsArithmetic(subResult))
+                if (ContainsArithmetic(sub_result))
                 {
-                    subResult = to_string(static_cast<int>(EvaluateArithmetic(subResult)));
+                    sub_result = to_string(static_cast<int>(EvaluateArithmetic(sub_result)));
                 }
 
-                result.replace(start, end - start + 1, subResult);
+                result.replace(start, end - start + 1, sub_result);
             }
             else
             {
@@ -286,13 +293,13 @@ private:
         try
         {
             // Handle multiplication and division first (operator precedence)
-            string cleanExpr = expr;
+            string clean_expr = expr;
 
             // Remove extra spaces
-            cleanExpr.erase(remove(cleanExpr.begin(), cleanExpr.end(), ' '), cleanExpr.end());
+            clean_expr.erase(remove(clean_expr.begin(), clean_expr.end(), ' '), clean_expr.end());
 
             // Simple expression parser with precedence
-            return parseExpression(cleanExpr);
+            return ParseExpression(clean_expr);
         }
         catch (...)
         {
@@ -301,7 +308,7 @@ private:
     }
 
     // Parse expression with operator precedence
-    double parseExpression(const string &expr)
+    double ParseExpression(const string &expr)
     {
         vector<double> numbers;
         vector<char> operators;
@@ -372,7 +379,7 @@ private:
     }
 
     // Process Console.WriteLine statements
-    void processConsoleWriteLine(const string &line)
+    void ProcessConsoleWriteLine(const string &line)
     {
         // Find Console.WriteLine(...)
         size_t start = line.find("Console.WriteLine(");
@@ -390,27 +397,35 @@ private:
     }
 
     // Enhanced variable declaration processing
-    void processVariableDeclaration(const string &line)
+    void ProcessVariableDeclaration(const string &line)
     {
-        // Look for type varName = value;
-        vector<string> types = {"int", "string", "double", "float", "bool", "long", "decimal", "char"};
+        // Look for type var_name = value;
+        array<string, 8> types = {"int", "string", "double", "float", "bool", "long", "decimal", "char"};
 
         for (const string &type : types)
         {
-            size_t typePos = line.find(type + " ");
-            if (typePos != string::npos)
+            size_t type_pos = line.find(type + " ");
+            if (type_pos != string::npos)
             {
-                size_t nameStart = typePos + type.length() + 1;
-                size_t equalPos = line.find('=', nameStart);
-                size_t semicolonPos = line.find(';', equalPos);
+                size_t name_start = type_pos + type.length() + 1;
+                size_t equal_pos = line.find('=', name_start);
+                size_t semicolon_pos = line.find(';', equal_pos);
 
-                if (equalPos != string::npos && semicolonPos != string::npos)
+                if (equal_pos != string::npos && semicolon_pos != string::npos)
                 {
-                    string varName = Trim(line.substr(nameStart, equalPos - nameStart));
-                    string value = Trim(line.substr(equalPos + 1, semicolonPos - equalPos - 1));
+                    string var_name = 
+                    Trim
+                    (
+                        line.substr
+                        (
+                            name_start, 
+                            equal_pos - name_start
+                        )
+                    );
+                    string value = Trim(line.substr(equal_pos + 1, semicolon_pos - equal_pos - 1));
 
-                    string evaluatedValue = EvaluateExpression(value);
-                    variables[varName] = evaluatedValue;
+                    string evaluated_value = EvaluateExpression(value);
+                    variables[var_name] = evaluated_value;
                     return;
                 }
             }
@@ -420,18 +435,18 @@ private:
     // Process variable assignments
     void processAssignment(const string &line)
     {
-        size_t equalPos = line.find('=');
-        size_t semicolonPos = line.find(';');
+        size_t equal_pos = line.find('=');
+        size_t semicolon_pos = line.find(';');
 
-        if (equalPos != string::npos && semicolonPos != string::npos)
+        if (equal_pos != string::npos && semicolon_pos != string::npos)
         {
-            string varName = Trim(line.substr(0, equalPos));
-            string value = Trim(line.substr(equalPos + 1, semicolonPos - equalPos - 1));
+            string var_name = Trim(line.substr(0, equal_pos));
+            string value = Trim(line.substr(equal_pos + 1, semicolon_pos - equal_pos - 1));
 
-            if (variables.find(varName) != variables.end())
+            if (variables.find(var_name) != variables.end())
             {
-                string evaluatedValue = EvaluateExpression(value);
-                variables[varName] = evaluatedValue;
+                string evaluated_value = EvaluateExpression(value);
+                variables[var_name] = evaluated_value;
             }
         }
     }
@@ -464,11 +479,11 @@ public:
             // Process different types of statements
             if (Contains(line, "Console.WriteLine"))
             {
-                processConsoleWriteLine(line);
+                ProcessConsoleWriteLine(line);
             }
             else if (isVariableDeclaration(line))
             {
-                processVariableDeclaration(line);
+                ProcessVariableDeclaration(line);
             }
             else if (isAssignment(line))
             {
@@ -502,11 +517,11 @@ public:
             // Process different types of statements
             if (Contains(line, "Console.WriteLine"))
             {
-                processConsoleWriteLine(line);
+                ProcessConsoleWriteLine(line);
             }
             else if (isVariableDeclaration(line))
             {
-                processVariableDeclaration(line);
+                ProcessVariableDeclaration(line);
             }
             else if (isAssignment(line))
             {
